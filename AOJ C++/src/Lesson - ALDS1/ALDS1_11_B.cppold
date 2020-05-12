@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define NIL -1
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+#define MAX 100
+
+int n, G[MAX + 1][MAX + 1];
+int col[MAX + 1];
+int d[MAX + 1], f[MAX + 1];
+int t;
+stack<int> S;
+
+void init(int n) {
+	for (int i = 1; i <= n; i++) {
+		col[i] = WHITE;
+		for (int j = 1; j <= n; j++)
+			G[i][j] = 0;
+	}
+	t = 0;
+}
+
+void dfsvisit(int u) {
+	col[u] = GRAY;
+	d[u] = ++t;
+	for (int v = 1; v <= n; v++)
+		if (col[v] == WHITE && G[u][v])
+			dfsvisit(v);
+	col[u] = BLACK;
+	f[u] = ++t;
+}
+
+void dfs() {
+	for (int i = 1; i <= n; i++)
+		if (col[i] == WHITE) dfsvisit(i);
+}
+
+void input() {
+	for (int i = 0; i < n; i++) {
+		int u, k;
+		cin >> u >> k;
+		for (int j = 0; j < k; j++) {
+			int v;
+			cin >> v;
+			G[u][v] = 1;
+		}
+	}
+}
+
+void output() {
+	for (int i = 1; i <= n; i++)
+		cout << i << " " << d[i] << " " << f[i] << endl;
+}
+
+int main() {
+	cin >> n;
+	init(n);
+	input();
+	dfs();
+	output();
+}
