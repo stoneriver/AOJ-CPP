@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define NIL -1
+
+int n;
+queue<int> pre;
+vector<int> in;
+queue<int> post;
+
+int findin(int u) {
+	for (int i = 0; i < n; i++)
+		if (in[i] == u)
+			return i;
+	return NIL;
+}
+
+void rec(int l, int r) {
+	if (l >= r)
+		return;
+	int c = pre.front();
+	pre.pop();
+	int m = findin(c);
+	rec(l, m);
+	rec(m + 1, r);
+	post.push(c);
+}
+
+int main() {
+	cin >> n;
+	for (int i = 0; i < n; i++) {
+		int a;
+		cin >> a;
+		pre.push(a);
+	}
+	for (int i = 0; i < n; i++) {
+		int a;
+		cin >> a;
+		in.push_back(a);
+	}
+	rec(0, n);
+	for (int i = 0; i < n - 1; i++) {
+		cout << post.front() << " ";
+		post.pop();
+	}
+	cout << post.front() << endl;
+	return 0;
+}

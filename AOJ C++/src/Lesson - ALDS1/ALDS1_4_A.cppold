@@ -1,0 +1,28 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+	int n, q;
+	cin >> n;
+	int S[n + 1];
+	for (int i = 0; i < n; i++)
+		cin >> S[i];
+	cin >> q;
+	int T[q];
+	for (int i = 0; i < q; i++)
+		cin >> T[i];
+	int ans = 0;
+	for (int i = 0; i < q; i++) {
+		S[n] = T[i];
+		int j = 0;
+		ans++;
+		while (S[j] != T[i]) {
+			j++;
+			if (j == n) {
+				ans--;
+			}
+		}
+	}
+	cout << ans << endl;
+	return 0;
+}

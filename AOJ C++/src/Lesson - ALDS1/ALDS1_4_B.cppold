@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+	int n, q;
+	cin >> n;
+	int S[n];
+	for (int i = 0; i < n; i++)
+		cin >> S[i];
+	cin >> q;
+	int T[q];
+	for (int i = 0; i < q; i++)
+		cin >> T[i];
+	int ans = 0;
+	for (int i = 0; i < q; i++) {
+		int left = 0, right = n, mid;
+		while (left < right) {
+			mid = (left + right) / 2;
+			if (S[mid] == T[i]) {
+				ans++;
+				break;
+			} else if (S[mid] < T[i]) {
+				left = mid + 1;
+			} else {
+				right = mid;
+			}
+		}
+	}
+	cout << ans << endl;
+	return 0;
+}

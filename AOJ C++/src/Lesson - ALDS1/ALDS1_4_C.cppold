@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<bool> H(16777216, false);
+
+int getkey(string str) {
+	int key = 0;
+	for (int i = 0; i < str.size(); i++) {
+		if (str[i] == 'A')
+			key += 1 * pow(4, i);
+		else if (str[i] == 'C')
+			key += 2 * pow(4, i);
+		else if (str[i] == 'G')
+			key += 3 * pow(4, i);
+		else
+			key += 4 * pow(4, i);
+	}
+	return key;
+}
+
+void insert(int key) {
+	H[key] = true;
+}
+
+bool find(int key) {
+	return H[key];
+}
+
+int main() {
+	int n;
+	cin >> n;
+	for (int i = 0; i < n; i++) {
+		string s, key;
+		cin >> s >> key;
+		if (s == "insert") {
+			insert(getkey(key));
+		} else {
+			cout << (find(getkey(key)) ? "yes" : "no") << endl;
+		}
+	}
+	return 0;
+}

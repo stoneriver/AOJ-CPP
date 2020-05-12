@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define NIL -1
+
+struct node {
+	int p, l, r;
+};
+
+node T[25];
+int D[25], H[25];
+
+void setdepth(int id, int d) {
+	D[id] = d;
+	if (T[id].l != NIL)
+		setdepth(T[id].l, d + 1);
+	if (T[id].r != NIL)
+		setdepth(T[id].r, d + 1);
+}
+
+int setheight(int id) {
+	int h1 = 0, h2 = 0;
+	if (T[id].l != NIL)
+		h1 = setheight(T[id].l) + 1;
+	if (T[id].r != NIL)
+		h2 = setheight(T[id].r) + 1;
+	return H[id] = max(h1, h2);
+}
+
+void initnode(int n) {
+	for (int i = 0; i < n; i++) {
+		T[i] = { NIL, NIL, NIL };
+	}
+}
+
+void regnode(int id, int l, int r) {
+	T[id].l = l;
+	T[l].p = id;
+	T[id].r = r;
+	T[r].p = id;
+}
+
+int getsibling(int id) {
+	if (T[id].p == NIL) {
+		return NIL;
+	} else if (T[T[id].p].l == id) {
+		return T[T[id].p].r;
+	} else {
+		return T[T[id].p].l;
+	}
+}
+
+int getdegree(int id) {
+	int ans = 0;
+	if (T[id].l != NIL)
+		ans++;
+	if (T[id].r != NIL)
+		ans++;
+	return ans;
+}
+
+string gettype(int id) {
+	if (T[id].p == NIL)
+		return "root";
+	else if (T[id].l == NIL && T[id].r == NIL)
+		return "leaf";
+	else
+		return "internal node";
+}
+
+int main() {
+	int n, root;
+	cin >> n;
+	initnode(n);
+	for (int i = 0; i < n; i++) {
+		int id, l, r;
+		cin >> id >> l >> r;
+		regnode(id, l, r);
+	}
+	for (int i = 0;; i++) {
+		if (T[i].p == NIL) {
+			root = i;
+			break;
+		}
+	}
+	setheight(root);
+	setdepth(root, 0);
+	for (int i = 0; i < n; i++) {
+		cout << "node " << i << ": parent = " << T[i].p << ", sibling = "
+				<< getsibling(i) << ", degree = " << getdegree(i)
+				<< ", depth = " << D[i] << ", height = " << H[i] << ", "
+				<< gettype(i) << endl;
+	}
+	return 0;
+}
