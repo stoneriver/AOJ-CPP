@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class disjointset {
+
+	vector<int> rank, p;
+public:
+	disjointset(int size) {
+		rank.resize(size);
+		p.resize(size);
+		for (int i = 0; i < size; i++)
+			makeset(i);
+	}
+
+	void makeset(int x) {
+		p[x] = x;
+		rank[x] = 0;
+	}
+
+	bool same(int a, int b) {
+		return findset(a) == findset(b);
+	}
+
+	void unite(int a, int b) {
+		link(findset(a), findset(b));
+	}
+
+	void link(int x, int y) {
+		if (rank[x] > rank[y]) {
+			p[y] = x;
+		} else {
+			p[x] = y;
+			if (rank[x] == rank[y])
+				rank[y]++;
+		}
+	}
+
+	int findset(int x) {
+		if (p[x] == x)
+			return x;
+		else
+			return p[x] = findset(p[x]);
+	}
+
+};
+
+int main() {
+	int n, q;
+	cin >> n >> q;
+	disjointset DS = disjointset(n);
+	for (int i = 0; i < q; i++) {
+		int cmd, x, y;
+		cin >> cmd >> x >> y;
+		if (cmd == 0) {
+			DS.unite(x, y);
+		} else {
+			cout << DS.same(x, y) << endl;
+		}
+	}
+	return 0;
+}

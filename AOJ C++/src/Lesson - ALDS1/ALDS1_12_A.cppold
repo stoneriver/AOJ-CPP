@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define MAX 5
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+int n;
+int M[MAX][MAX];
+int col[MAX];
+int d[MAX];
+int p[MAX];
+
+int main() {
+	cin >> n;
+	for (int i = 0; i < n; i++) {
+		col[i] = WHITE;
+		d[i] = INT_MAX;
+		for (int j = 0; j < n; j++) {
+			cin >> M[i][j];
+			if (M[i][j] == -1)
+				M[i][j] = INT_MAX;
+		}
+	}
+
+	p[0] = -1;
+	d[0] = 0;
+	while (true) {
+		int minc = INT_MAX;
+		int u;
+		for (int i = 0; i < n; i++) {
+			if (col[i] != BLACK && d[i] < minc) {
+				minc = d[i];
+				u = i;
+			}
+		}
+		if (minc == INT_MAX)
+			break;
+		col[u] = BLACK;
+		for (int v = 0; v < n; v++) {
+			if (col[v] != BLACK && M[u][v] != INT_MAX) {
+				if (M[u][v] < d[v]) {
+					d[v] = M[u][v];
+					p[v] = u;
+					col[v] = GRAY;
+				}
+			}
+		}
+	}
+
+	int ans = 0;
+	for (int i = 0; i < n; i++) {
+		if (p[i] != -1)
+			ans += M[p[i]][i];
+	}
+	cout << ans << endl;
+
+	return 0;
+}

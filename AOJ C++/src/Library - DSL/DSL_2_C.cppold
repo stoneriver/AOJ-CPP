@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define MAX 500000
+#define NIL -1
+
+struct node {
+	int location, l, r;
+};
+
+struct point {
+	int id, x, y;
+	bool operator <(const point &p) const {
+		return id < p.id;
+	}
+	void print() {
+		printf("%d\n", id);
+	}
+};
+
+point P[MAX];
+node T[MAX];
+int np;
+
+bool lessX(const point &p1, const point &p2) {
+	return p1.x < p2.x;
+}
+bool lessY(const point &p1, const point &p2) {
+	return p1.y < p2.y;
+}
+
+int make2dtree(int l, int r, int d) {
+	if (!(l < r))
+		return NIL;
+	if (d % 2 == 0)
+		sort(&P[l], &P[r], lessX);
+	else
+		sort(&P[l], &P[r], lessY);
+	int mid = (l + r) / 2;
+	int t = np++;
+	T[t].location = mid;
+	T[t].l = make2dtree(l, mid, d + 1);
+	T[t].r = make2dtree(mid + 1, r, d + 1);
+	return t;
+}
+
+void find(int v, int sx, int tx, int sy, int ty, int d, vector<point> &ans) {
+	int x = P[T[v].location].x;
+	int y = P[T[v].location].y;
+	if (sx <= x && x <= tx && sy <= y && y <= ty)
+		ans.push_back(P[T[v].location]);
+	if (d % 2 == 0) {
+		if (T[v].l != NIL && sx <= x)
+			find(T[v].l, sx, tx, sy, ty, d + 1, ans);
+		if (T[v].r != NIL && x <= tx)
+			find(T[v].r, sx, tx, sy, ty, d + 1, ans);
+	} else {
+		if (T[v].l != NIL && sy <= y)
+			find(T[v].l, sx, tx, sy, ty, d + 1, ans);
+		if (T[v].r != NIL && y <= ty)
+			find(T[v].r, sx, tx, sy, ty, d + 1, ans);
+	}
+}
+
+int main() {
+	np = 0;
+	int n;
+	cin >> n;
+	for (int i = 0; i < n; i++) {
+		P[i].id = i;
+		scanf("%d %d", &P[i].x, &P[i].y);
+		T[i].l = T[i].r = T[i].location = NIL;
+	}
+	int r = make2dtree(0, n, 0);
+	int q;
+	cin >> q;
+	for (int i = 0; i < q; i++) {
+		int sx, tx, sy, ty;
+		scanf("%d %d %d %d", &sx, &tx, &sy, &ty);
+		vector<point> ans;
+		find(r, sx, tx, sy, ty, 0, ans);
+		sort(ans.begin(), ans.end());
+		for (int j = 0; j < ans.size(); j++) {
+			ans[j].print();
+		}
+		printf("\n");
+	}
+	return 0;
+}
