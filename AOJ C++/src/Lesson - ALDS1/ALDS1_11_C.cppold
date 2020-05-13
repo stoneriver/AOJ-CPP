@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define MAX 100
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+int n;
+bool G[MAX + 1][MAX + 1];
+int col[MAX + 1];
+int d[MAX + 1];
+
+void init(int n) {
+	for (int i = 1; i <= n; i++) {
+		col[i] = WHITE;
+		d[i] = -1;
+		for (int j = 1; j <= n; j++)
+			G[i][j] = 0;
+	}
+}
+
+void bfs(int u) {
+	queue<int> Q;
+	Q.push(u);
+	col[u] = GRAY;
+	d[u] = 0;
+	while (!Q.empty()) {
+		int v = Q.front();
+		Q.pop();
+		for (int i = 1; i <= n; i++) {
+			if (G[v][i] && col[i] == WHITE) {
+				Q.push(i);
+				col[i] = GRAY;
+				d[i] = d[v] + 1;
+			}
+		}
+		col[v] = BLACK;
+	}
+}
+
+int main() {
+	cin >> n;
+	init(n);
+	for (int i = 0; i < n; i++) {
+		int u, k;
+		cin >> u >> k;
+		for (int j = 0; j < k; j++) {
+			int v;
+			cin >> v;
+			G[u][v] = 1;
+		}
+	}
+	bfs(1);
+	for (int u = 1; u <= n; u++) {
+		cout << u << " " << d[u] << endl;
+	}
+	return 0;
+}
