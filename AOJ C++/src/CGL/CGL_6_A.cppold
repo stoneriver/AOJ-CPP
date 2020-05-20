@@ -1,0 +1,290 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define EPS (1e-10)
+#define equals(a, b) (fabs((a) - (b)) < EPS)
+
+class Point {
+public:
+	double x, y;
+	Point(double x = 0.0, double y = 0.0) :
+			x(x), y(y) {
+	}
+
+	Point operator +(Point p) {
+		return Point(x + p.x, y + p.y);
+	}
+	Point operator -(Point p) {
+		return Point(x - p.x, y - p.y);
+	}
+	Point operator *(double k) {
+		return Point(x * k, y * k);
+	}
+	Point operator /(double k) {
+		return Point(x / k, y / k);
+	}
+
+	double norm() {
+		return x * x + y * y;
+	}
+	double abs() {
+		return sqrt(norm());
+	}
+
+	bool operator <(Point p) {
+		return x != p.x ? x < p.x : y < p.y;
+	}
+	bool operator ==(Point p) {
+		return equals(x, p.x) && equals(y, p.y);
+	}
+};
+typedef Point Vector;
+
+class Segment {
+public:
+	Point p1, p2;
+	Segment(Point p1 = Point(), Point p2 = Point()) :
+			p1(p1), p2(p2) {
+	}
+};
+typedef Segment Line;
+
+double dot(Vector v1, Vector v2) {
+	return v1.x * v2.x + v1.y * v2.y;
+}
+double cross(Vector v1, Vector v2) {
+	return v1.x * v2.y - v1.y * v2.x;
+}
+Vector unitVector(Vector v) {
+	return v / v.abs();
+}
+Vector polar(double r, double a) {
+	return Vector(r * cos(a), r * sin(a));
+}
+double arg(Vector v) {
+	return atan2(v.y, v.x);
+}
+bool isOrthogonal(Vector v1, Vector v2) {
+	return equals(dot(v1, v2), 0.0);
+}
+bool isOrthogonal(Segment s1, Segment s2) {
+	return equals(dot(s1.p2 - s1.p1, s2.p2 - s2.p1), 0.0);
+}
+bool isOrthogonal(Point l1, Point l2, Point m1, Point m2) {
+	return isOrthogonal(l2 - l1, m2 - m1);
+}
+bool isParallel(Vector v1, Vector v2) {
+	return equals(cross(v1, v2), 0.0);
+}
+bool isParallel(Segment s1, Segment s2) {
+	return equals(cross(s1.p2 - s1.p1, s2.p2 - s2.p1), 0.0);
+}
+bool isParallel(Point l1, Point l2, Point m1, Point m2) {
+	return isParallel(l1 - l2, m1 - m2);
+}
+
+enum PositionSP {
+	COUNTER_CLOCKWISE = -1,
+	CLOCKWISE = 1,
+	ONLINE_BACK = 2,
+	ONLINE_FRONT = -2,
+	ON_SEGMENT = 0
+};
+PositionSP ccw(Point p1, Point p2, Point p) {
+	Vector a = p2 - p1, b = p - p1;
+	if (cross(a, b) > EPS)
+		return COUNTER_CLOCKWISE;
+	else if (cross(a, b) < -EPS)
+		return CLOCKWISE;
+	else if (dot(a, b) < -EPS)
+		return ONLINE_BACK;
+	else if (a.norm() < b.norm())
+		return ONLINE_FRONT;
+	else
+		return ON_SEGMENT;
+}
+bool intersect(Point p1, Point p2, Point p3, Point p4) {
+	return (ccw(p1, p2, p3) * ccw(p1, p2, p4) <= 0
+			&& ccw(p3, p4, p1) * ccw(p3, p4, p2) <= 0);
+}
+bool intersect(Segment s1, Segment s2) {
+	return intersect(s1.p1, s1.p2, s2.p1, s2.p2);
+}
+Point intersection(Segment s1, Segment s2) {
+	double d1 = abs(cross(s2.p2 - s2.p1, s1.p1 - s2.p1));
+	double d2 = abs(cross(s2.p1 - s2.p2, s1.p2 - s2.p2));
+	return s1.p1 + (s1.p2 - s1.p1) * d1 / (d1 + d2);
+}
+Point projection(Segment s, Point p) {
+	Vector base = s.p2 - s.p1;
+	double r = dot(p - s.p1, base) / base.norm();
+	return s.p1 + base * r;
+}
+
+double distancePP(Point p1, Point p2) {
+	return (p1 - p2).abs();
+}
+double distanceLP(Line l, Point p) {
+	return abs(cross(l.p2 - l.p1, p - l.p1) / distancePP(l.p2, l.p1));
+}
+double distanceSP(Segment s, Point p) {
+	if (dot(s.p2 - s.p1, p - s.p1) < 0.0)
+		return distancePP(s.p1, p);
+	else if (dot(s.p1 - s.p2, p - s.p2) < 0.0)
+		return distancePP(s.p2, p);
+	else
+		return distanceLP(s, p);
+}
+double distanceSS(Segment s1, Segment s2) {
+	if (intersect(s1, s2))
+		return 0.0;
+	else {
+		return min(min(distanceSP(s1, s2.p1), distanceSP(s1, s2.p2)),
+				min(distanceSP(s2, s1.p1), distanceSP(s2, s1.p2)));
+	}
+}
+
+class Circle {
+public:
+	Point c;
+	double r;
+	Circle(Point c = Point(), double r = 0.0) :
+			c(c), r(r) {
+	}
+};
+pair<Point, Point> intersection(Circle c, Line l) {
+	Point pr = projection(l, c.c);
+	double base = sqrt(c.r * c.r - (pr - c.c).norm());
+	Vector e = unitVector(l.p2 - l.p1);
+	return make_pair(pr + e * base, pr - e * base);
+}
+pair<Point, Point> intersection(Circle c1, Circle c2) {
+	double d = (c2.c - c1.c).abs();
+	double a = acos((c1.r * c1.r + d * d - c2.r * c2.r) / (2 * c1.r * d));
+	double t = arg(c2.c - c1.c);
+	return make_pair(c1.c + polar(c1.r, t + a), c1.c + polar(c1.r, t - a));
+}
+
+typedef vector<Point> Polygon;
+enum ContainGP {
+	OUTSIDE = 0, ON_EDGE = 1, INSIDE = 2
+};
+ContainGP contains(Polygon g, Point p) {
+	int n = g.size();
+	bool x = false;
+	for (int i = 0; i < n; i++) {
+		Vector a = g[i] - p, b = g[(i + 1) % n] - p;
+		if (abs(cross(a, b)) < EPS && dot(a, b) < EPS)
+			return ON_EDGE;
+		if (a.y > b.y)
+			swap(a, b);
+		if (cross(a, b) > EPS && a.y < EPS && b.y > EPS)
+			x = !x;
+	}
+	return x ? INSIDE : OUTSIDE;
+}
+
+Polygon andrewScan(Polygon P) {
+	Polygon U, L;
+	int n = P.size();
+	if (n < 3)
+		return P;
+	sort(P.begin(), P.end());
+	U.push_back(P[0]);
+	U.push_back(P[1]);
+	for (int i = 2; i < n; i++) {
+		while (U.size() >= 2
+				&& ccw(U[U.size() - 2], U[U.size() - 1], P[i])
+						== COUNTER_CLOCKWISE) {
+			U.pop_back();
+		}
+		U.push_back(P[i]);
+	}
+	L.push_back(P[n - 1]);
+	L.push_back(P[n - 2]);
+	for (int i = n - 3; i >= 0; i--) {
+		while (L.size() >= 2
+				&& ccw(L[L.size() - 2], L[L.size() - 1], P[i])
+						== COUNTER_CLOCKWISE) {
+			L.pop_back();
+		}
+		L.push_back(P[i]);
+	}
+	for (int i = 1; i < L.size() - 1; i++)
+		U.push_back(L[i]);
+	return U;
+}
+
+enum EndPointType {
+	BOTTOM = 0, LEFT = 1, RIGHT = 2, TOP = 3
+};
+class EndPoint {
+public:
+	Point P;
+	int seg;
+	EndPointType t;
+	EndPoint() {
+	}
+	EndPoint(Point P, int seg, EndPointType t) :
+			P(P), seg(seg), t(t) {
+	}
+	bool operator <(const EndPoint &ep) const {
+		return P.y == ep.P.y ? t < ep.t : P.y < ep.P.y;
+	}
+};
+int manhattanIntersection(vector<Segment> S) {
+	vector<EndPoint> EP;
+	for (int i = 0; i < S.size(); i++) {
+		if (S[i].p1.y == S[i].p2.y) {
+			if (S[i].p1.x < S[i].p2.x) {
+				EP.push_back(EndPoint(S[i].p1, i, LEFT));
+				EP.push_back(EndPoint(S[i].p2, i, RIGHT));
+			} else {
+				EP.push_back(EndPoint(S[i].p1, i, RIGHT));
+				EP.push_back(EndPoint(S[i].p2, i, LEFT));
+			}
+		} else {
+			if (S[i].p1.y < S[i].p2.y) {
+				EP.push_back(EndPoint(S[i].p1, i, BOTTOM));
+				EP.push_back(EndPoint(S[i].p2, i, TOP));
+			} else {
+				EP.push_back(EndPoint(S[i].p1, i, TOP));
+				EP.push_back(EndPoint(S[i].p2, i, BOTTOM));
+			}
+		}
+	}
+	sort(EP.begin(), EP.end());
+	int cnt = 0;
+	set<int> BT;
+	for (int i = 0; i < S.size() * 2; i++) {
+		switch (EP[i].t) {
+		case BOTTOM:
+			BT.insert(EP[i].P.x);
+			break;
+		case TOP:
+			BT.erase(EP[i].P.x);
+			break;
+		case LEFT:
+			if (S[EP[i].seg].p1.x > S[EP[i].seg].p2.x)
+				swap(S[EP[i].seg].p1, S[EP[i].seg].p2);
+			set<int>::iterator l = BT.lower_bound(S[EP[i].seg].p1.x);
+			set<int>::iterator r = BT.upper_bound(S[EP[i].seg].p2.x);
+			cnt += distance(l, r);
+			break;
+		}
+	}
+	return cnt;
+}
+
+int main() {
+	int N;
+	vector<Segment> S;
+	cin >> N;
+	for (int i = 0; i < N; i++) {
+		Segment s;
+		cin >> s.p1.x >> s.p1.y;
+		cin >> s.p2.x >> s.p2.y;
+		S.push_back(s);
+	}
+	cout << manhattanIntersection(S) << endl;
+	return 0;
+}

@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class edge {
+public:
+	int s, t, w;
+	edge(int s, int t, int w) :
+			s(s), t(t), w(w) {
+	}
+	bool operator <(const edge &e) const {
+		return w < e.w;
+	}
+	void print() const {
+		cout << s << " " << t << " " << w << endl;
+	}
+};
+
+class disjointset {
+public:
+	disjointset(int size) {
+		rank.resize(size);
+		p.resize(size);
+		for (int i = 0; i < size; i++)
+			makeset(i);
+	}
+	void unite(int a, int b) {
+		link(findset(a), findset(b));
+	}
+	bool same(int a, int b) {
+		return findset(a) == findset(b);
+	}
+private:
+	vector<int> rank, p;
+	void makeset(int x) {
+		p[x] = x;
+		rank[x] = 0;
+	}
+	void link(int x, int y) {
+		if (rank[x] > rank[y]) {
+			p[y] = x;
+		} else {
+			p[x] = y;
+			if (rank[x] == rank[y])
+				rank[y]++;
+		}
+	}
+	int findset(int x) {
+		if (p[x] == x)
+			return x;
+		else
+			return p[x] = findset(p[x]);
+	}
+};
+
+#define MAXV 10000
+#define MAXE 100000
+int v, e;
+vector<edge> E;
+
+int kruskal() {
+	int ans = 0;
+	disjointset DS = disjointset(v);
+	for (int i = 0; i < e; i++) {
+		if (!DS.same(E[i].s, E[i].t)) {
+			DS.unite(E[i].s, E[i].t);
+			ans += E[i].w;
+		}
+	}
+	return ans;
+}
+
+int main() {
+	cin >> v >> e;
+	for (int i = 0; i < e; i++) {
+		int s, t, w;
+		cin >> s >> t >> w;
+		E.push_back(edge(s, t, w));
+	}
+	sort(E.begin(), E.end());
+	cout << kruskal() << endl;
+	return 0;
+}

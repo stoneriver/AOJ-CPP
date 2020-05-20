@@ -1,0 +1,68 @@
+	#include <bits/stdc++.h>
+	using namespace std;
+
+	#define MAXV 100000
+	#define MAXE 100000
+	int V, E;
+	vector<int> G[MAXV];
+	set<int> ans;
+	bool visited[MAXV];
+	int prenum[MAXV];
+	int parent[MAXV];
+	int lowest[MAXV];
+	int nx;
+
+	void init() {
+		for (int i = 0; i < V; i++) {
+			visited[i] = false;
+		}
+		nx = 1;
+	}
+
+	void input() {
+		for (int i = 0; i < E; i++) {
+			int s, t;
+			cin >> s >> t;
+			G[s].push_back(t);
+			G[t].push_back(s);
+		}
+	}
+
+	void dfs(int u, int p) {
+		visited[u] = true;
+		lowest[u] = prenum[u] = nx;
+		nx++;
+		for (int j = 0; j < G[u].size(); j++) {
+			if (!visited[G[u][j]]) {
+				parent[G[u][j]] = u;
+				dfs(G[u][j], u);
+				lowest[u] = min(lowest[u], lowest[G[u][j]]);
+			} else if (G[u][j] != p) {
+				lowest[u] = min(lowest[u], prenum[G[u][j]]);
+			}
+		}
+	}
+
+	void artpoints() {
+		int np = 0;
+		for (int u = 1; u < V; u++) {
+			if (parent[u] == 0)
+				np++;
+			else if (prenum[parent[u]] <= lowest[u])
+				ans.insert(parent[u]);
+		}
+		if (np > 1)
+			ans.insert(0);
+		for (set<int>::iterator it = ans.begin(); it != ans.end(); it++) {
+			cout << (*it) << endl;
+		}
+	}
+
+	int main() {
+		cin >> V >> E;
+		init();
+		input();
+		dfs(0, -1);
+		artpoints();
+		return 0;
+	}

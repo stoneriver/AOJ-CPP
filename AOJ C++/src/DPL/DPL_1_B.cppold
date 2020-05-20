@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define MAXN 100
+#define MAXW 10000
+int I[MAXN + 1][2], C[MAXN + 1][MAXW + 1];
+
+int main() {
+	int N, W;
+	cin >> N >> W;
+	for (int i = 1; i <= N; i++) {
+		cin >> I[i][0] >> I[i][1];
+	}
+	for (int i = 0; i <= N; i++) {
+		C[i][0] = 0;
+	}
+	for (int w = 0; w <= W; w++) {
+		C[0][w] = 0;
+	}
+	for (int i = 1; i <= N; i++) {
+		for (int w = 1; w <= W; w++) {
+			if (w < I[i][1])
+				C[i][w] = C[i - 1][w];
+			else
+				C[i][w] = max(C[i - 1][w], C[i - 1][w - I[i][1]] + I[i][0]);
+		}
+	}
+	cout << C[N][W] << endl;
+	return 0;
+}

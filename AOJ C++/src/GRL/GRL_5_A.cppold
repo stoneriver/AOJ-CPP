@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class edge {
+public:
+	int t, w;
+	edge(int t, int w) :
+			t(t), w(w) {
+	}
+};
+
+#define MAX 100000
+#define INF INT_MAX
+int n;
+int d[MAX];
+vector<edge> G[MAX];
+
+void bfs(int s) {
+	for (int i = 0; i < n; i++)
+		d[i] = INF;
+	queue<int> Q;
+	Q.push(s);
+	d[s] = 0;
+	while (!Q.empty()) {
+		int u = Q.front();
+		Q.pop();
+		for (int i = 0; i < G[u].size(); i++) {
+			edge e = G[u][i];
+			if (d[e.t] == INF) {
+				d[e.t] = d[u] + e.w;
+				Q.push(e.t);
+			}
+		}
+	}
+}
+
+int solve() {
+	int tgt = 0;
+	bfs(tgt);
+	int maxv = 0;
+	for (int i = 0; i < n; i++) {
+		if (d[i] == INF)
+			continue;
+		if (d[i] > maxv) {
+			maxv = d[i];
+			tgt = i;
+		}
+	}
+	bfs(tgt);
+	for (int i = 0; i < n; i++) {
+		if (d[i] == INF)
+			continue;
+		maxv = max(maxv, d[i]);
+	}
+	return maxv;
+}
+
+int main() {
+	cin >> n;
+	for (int i = 1; i < n; i++) {
+		int s, t, w;
+		cin >> s >> t >> w;
+		G[s].push_back(edge(t, w));
+		G[t].push_back(edge(s, w));
+	}
+	cout << solve() << endl;
+	return 0;
+}
